@@ -28,6 +28,8 @@ def sumar_dias_a_fecha(fecha, dias_sumar):
             if mes > 12:
                 mes = 1
                 anio += 1
+ #funcion para asegurarse que el año tenga 4 digitos y el mes y el dia 2 digitos               
+    return f"{year: 04d} {mes:02d} {dia:02d}"
 #fecha actual para que el programa le tenga como refencia (sujeta a cambios)
     return "2025-03-30"
 #prints para el menu
