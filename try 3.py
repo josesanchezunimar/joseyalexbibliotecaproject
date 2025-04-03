@@ -452,7 +452,21 @@ def eliminar_registros():
     print("0. Volver al menu principal")
     
     opcion = input("Seleccione una opcion: ")
-    
+#recordar añadir "codigo" 
     if opcion == '1':
         cedula = input("Ingrese la cedula del alumno a eliminar: ")
+        prestamos = leer_archivo(PRESTAMOS_FILE)
+        for prestamo in prestamos:
+            if prestamo[1] == codigo and prestamo[4] == 'activo':
+                print("No se puede eliminar un libro que esta actualmente prestado.")
+                return
+        
+        if eliminar_registro(LIBROS_FILE, codigo, 0):
+            print("\nLibro eliminado exitosamente!")
+        else:
+            print("\nNo se encontro un libro con este código.") 
+    elif opcion == '0':
+        return
+    else:
+        print("Opcion no válida.")
         
