@@ -333,3 +333,126 @@ def renovar_prestamo():
     
     print("\nPrestamo renovado exitosamente!")
     print(f"Nueva fecha de devolucion: {nueva_fecha_devolucion}")
+#nuevas funciones
+def devolver_libro():
+    clear_screen()
+    print("\nDEVOLVER LIBRO")
+    
+    cedula = input("Ingrese la cedula del alumno: ")
+    codigo_libro = input("Ingrese el codigo del libro: ")    
+    prestamo = None
+    prestamos = leer_archivo(PRESTAMOS_FILE)
+    for p in prestamos:
+        if p[0] == cedula and p[1] == codigo_libro and p[4] == 'activo':
+            prestamo = p
+            break
+    if not prestamo:
+        print("No se encontro un prestamo activo con estos datos.")
+        return
+    
+    #esto es para marcar préstamo como devuelto
+    prestamo[4] = 'devuelto'
+    modificar_registro(PRESTAMOS_FILE, cedula, 0, prestamo)
+    
+    #esto para actualizar cantidad de libros disponibles
+    libro = buscar_registro(LIBROS_FILE, codigo_libro, 0)
+    if libro:
+        libro[4] = str(int(libro[4]) + 1)
+        modificar_registro(LIBROS_FILE, codigo_libro, 0, libro)
+    
+    print("\nLibro devuelto exitosamente!")
+
+# Funciones para mostrar las sanciones sanciones
+def mostrar_alumnos_sancionados():
+    clear_screen()
+    print("ALUMNOS SANCIONADOS")
+    
+    sanciones = leer_archivo(SANCIONES_FILE)
+    if not sanciones:
+        print("No hay alumnos sancionados actualmente.")
+        return
+    hoy = obtener_fecha_actual()
+    
+    for sancion in sanciones:
+        alumno = buscar_registro(ALUMNOS_FILE, sancion[0], 0)
+        
+        if alumno and fecha_es_menor_o_igual(sancion[2], hoy):
+            # Calcular días restantes (simplificado)
+            dias_restantes = "calculando..."  # En una implementación real se calcularía
+            print(f"Alumno: {alumno[1]} (Cedula: {alumno[0]})")
+            print(f"Fecha inicio: {sancion[1]}, Fecha fin: {sancion[2]}")
+            print(f"Dias restantes de sancion: {dias_restantes}")            
+
+# Funciones para modificar, eliminar y buscar registros
+def modificar_registros():
+    clear_screen()
+    print("\nMODIFICAR REGISTROS")
+    print("1. Modificar alumno")
+    print("2. Modificar libro")
+    print("0. Volver al menu principal")
+    
+    opcion = input("Seleccione una opcion: ")
+    
+    if opcion == '1':
+        cedula = input("Ingrese la cédula del alumno a modificar: ")
+        alumno = buscar_registro(ALUMNOS_FILE, cedula, 0)
+        if not alumno:
+            print("No se encontro un alumno con esta cédula.")
+            return
+        
+        print("\nDatos actuales del alumno:")
+        print(f"Cedula: {alumno[0]}, Nombre: {alumno[1]}, Carrera: {alumno[2]}, Telfono: {alumno[3]}")
+        
+        print("\nIngrese los nuevos datos (deje en blanco para mantener el valor actual):")
+        nombre = input(f"Nuevo nombre [{alumno[1]}]: ") or alumno[1]
+        carrera = input(f"Nueva carrera [{alumno[2]}]: ") or alumno[2]
+        telefono = input(f"Nuevo telefono [{alumno[3]}]: ") or alumno[3]
+        alumno_actualizado = [alumno[0], nombre, carrera, telefono]
+        if modificar_registro(ALUMNOS_FILE, cedula, 0, alumno_actualizado):
+            print("\nAlumno modificado exitosamente!")
+        else:
+            print("\nError al modificar el alumno.")
+    
+    elif opcion == '2':
+        codigo = input("Ingrese el código del libro a modificar: ")
+        libro = buscar_registro(LIBROS_FILE, codigo, 0)
+        if not libro:
+            print("No se encontró un libro con este código.")
+            return
+        
+        print("\nDatos actuales del libro:")
+        print(f"Codigo: {libro[0]}, Título: {libro[1]}, Autor: {libro[2]}, Categoria: {libro[3]}, Cantidad: {libro[4]}")
+        
+        print("\nIngrese los nuevos datos (deje en blanco para mantener el valor actual):")
+        titulo = input(f"Nuevo título [{libro[1]}]: ") or libro[1]
+        autor = input(f"Nuevo autor [{libro[2]}]: ") or libro[2]
+        categoria = input(f"Nueva categoria [{libro[3]}]: ") or libro[3]
+        cantidad = input(f"Nueva cantidad [{libro[4]}]: ") or libro[4]
+        
+        if not cantidad.isdigit() or int(cantidad) < 0:
+            print("La cantidad debe ser un número positivo.")
+            return
+        
+        libro_actualizado = [libro[0], titulo, autor, categoria, cantidad]
+        if modificar_registro(LIBROS_FILE, codigo, 0, libro_actualizado):
+            print("\nLibro modificado exitosamente")
+        else:
+            print("\nError al modificar el libro.")
+    
+    elif opcion == '0':
+        return
+    else:
+        print("Opcion no válida.")
+
+def eliminar_registros():
+    clear_screen()
+    print("\n ELIMINAR REGISTROS ")
+    print("1. Eliminar alumno")
+    print("2. Eliminar libro")
+    print("0. Volver al menu principal")
+    
+    opcion = input("Seleccione una opcion: ")
+    
+    if opcion == '1':
+        cedula = input("Ingrese la cedula del alumno a eliminar: ")
+        
