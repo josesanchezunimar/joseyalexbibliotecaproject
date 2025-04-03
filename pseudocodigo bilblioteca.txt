@@ -1,0 +1,104 @@
+Inicio
+        Archivos para guardar datos
+    archivo_alumnos = abrir("alumnos.txt")
+    archivo_libros = abrir("libros.txt")
+    archivo_prestamos = abrir("prestamos.txt")
+    
+    Mostrar
+        Escribir "1. Agregar alumno"
+        Escribir "2. Registrar préstamo"
+        Escribir "3. Ver préstamos activos"
+        Escribir "4. Ver libros"
+        Escribir "5. Alumnos sancionados"
+        Escribir "6. Renovar préstamo"
+        Escribir "7. Devolver libro"
+        Escribir "8. Agregar libro"
+        Escribir "9. Salir"
+        Escribir "Elige una opción:"
+        Leer opcion
+        
+        Según opcion hacer
+            caso 1:
+                Escribir "Ingrese cédula:"
+                Leer cedula
+                Escribir "Ingrese nombre:"
+                Leer nombre
+                Escribir archivo_alumnos, cedula + "," + nombre + ",ACTIVO"
+                Escribir "Alumno registrado!"
+                
+            caso 2:
+                Escribir "Ingrese cédula alumno:"
+                Leer cedula
+                Escribir "Ingrese código libro:"
+                Leer codigo
+                Si buscar_en_archivo(cedula, archivo_alumnos) Y buscar_en_archivo(codigo, archivo_libros) entonces
+                    fecha = fecha_actual()
+                    Escribir archivo_prestamos, cedula + "," + codigo + "," + fecha + ",activo"
+                    Escribir "Préstamo registrado!"
+                Sino
+                    Escribir "Error: alumno o libro no existe"
+                Fin Si
+                
+            caso 3:
+                Escribir "--- PRÉSTAMOS ACTIVOS ---"
+                Para cada linea en archivo_prestamos hacer
+                    Si linea contiene "ACTIVO" entonces
+                        Escribir linea
+                    Fin Si
+                Fin Para
+                
+            caso 4:
+                Escribir "--- LIBROS DISPONIBLES ---"
+                Mostrar archivo_libros
+                
+            caso 5:
+                Escribir "--- ALUMNOS SANCIONADOS ---"
+                Para cada alumno en archivo_alumnos hacer
+                    Si alumno contiene "SANCIONADO" entonces
+                        Escribir alumno
+                    Fin Si
+                Fin Para
+                
+            caso 6:
+                Escribir "Ingrese cédula:"
+                Leer cedula
+                Si buscar_en_archivo(cedula, archivo_prestamos) entonces
+                    Actualizar fecha de vencimiento
+                    Escribir "Préstamo renovado por 3 días más"
+                Sino
+                    Escribir "No tiene préstamos activos"
+                Fin Si
+                
+            caso 7:
+                Escribir "Ingrese cédula:"
+                Leer cedula
+                    Marcar préstamo como DEVUELTO en archivo
+                Escribir "Libro devuelto correctamente"
+                
+            caso 8:
+                Escribir "Ingrese código libro:"
+                Leer codigo
+                Escribir "Ingrese título:"
+                Leer titulo
+                Escribir archivo_libros, codigo + "," + titulo + ",disponible"
+                Escribir "Libro agregado!"
+                
+            caso 9:
+                Escribir "Saliendo del sistema..."
+            otro:
+                Escribir "Opción inválida"
+        Fin Según
+    Hasta que opcion = 9
+    
+    cerrar(archivo_alumnos)
+    cerrar(archivo_libros)
+    cerrar(archivo_prestamos)
+Fin para
+
+Función buscar_en_archivo(dato, archivo)
+    Para cada linea en archivo hacer
+        Si linea contiene dato entonces
+            Retornar Verdadero
+        Fin Si
+    Retornar Falso
+Fin 
