@@ -35,7 +35,7 @@ def sumar_dias_a_fecha(fecha, dias_sumar):
     return f"{year: 04d} {mes:02d} {dia:02d}"
 #fecha actual para que el programa le tenga como refencia (sujeta a cambios)
 def obtener_fecha_actual():
-    return "2025-03-30"
+    return "2025-04-03" #fecha mas cercana a la actual, mas optimo seria usar import datetime, pero no se si podemos
 def comparar_fechas(fecha1, fecha2):
     return fecha1 == fecha2
 
@@ -452,9 +452,26 @@ def eliminar_registros():
     print("0. Volver al menu principal")
     
     opcion = input("Seleccione una opcion: ")
-#recordar añadir "codigo" 
+    
     if opcion == '1':
         cedula = input("Ingrese la cedula del alumno a eliminar: ")
+        
+        # Verificar si el alumno tiene préstamos activos
+        prestamos = leer_archivo(PRESTAMOS_FILE)
+        for prestamo in prestamos:
+            if prestamo[0] == cedula and prestamo[4] == 'activo':
+                print("No se puede eliminar un alumno con préstamos activos.")
+                return
+        
+        if eliminar_registro(ALUMNOS_FILE, cedula, 0):
+            print("\nAlumno eliminado exitosamente!")
+        else:
+            print("\nNo se encontro un alumno con esta cedula.")
+    
+    elif opcion == '2':
+        codigo = input("Ingrese el código del libro a eliminar: ")
+        
+        # Verificar si el libro está prestado
         prestamos = leer_archivo(PRESTAMOS_FILE)
         for prestamo in prestamos:
             if prestamo[1] == codigo and prestamo[4] == 'activo':
@@ -464,9 +481,123 @@ def eliminar_registros():
         if eliminar_registro(LIBROS_FILE, codigo, 0):
             print("\nLibro eliminado exitosamente!")
         else:
-            print("\nNo se encontro un libro con este código.") 
+            print("\nNo se encontro un libro con este código.")
+    
     elif opcion == '0':
         return
+    
     else:
         print("Opcion no válida.")
+
+def buscar_registros():
+    clear_screen()
+    print("\nbuscar registros ")
+    print("1. Buscar alumno")
+    print("2. Buscar libro")
+    print("3. Buscar prestamos por alumno")
+    print("0. Volver al menu principal")
+    
+    opcion = input("Seleccione una opcion: ")
+    
+    if opcion == '1':
+        criterio = input("Ingrese la cedula del alumno: ")
+        alumnos = leer_archivo(ALUMNOS_FILE)
+        encontrados = []
         
+        for alumno in alumnos:
+            if criterio.lower() in alumno[0].lower() or criterio.lower() in alumno[1].lower():
+                encontrados.append(alumno)
+        
+        if encontrados:
+            print("\nRESULTADOS DE BÚSQUEDA ")
+            for alumno in encontrados:
+                print(f"Cedula: {alumno[0]}, Nombre: {alumno[1]}, Carrera: {alumno[2]}, Telefono: {alumno[3]}")
+        else:
+            print("No se encontraron alumnos que coincidan con el criterio de busqueda.")
+    
+    elif opcion == '2':
+        criterio = input("Ingrese el codigo o parte del título del libro: ")
+        libros = leer_archivo(LIBROS_FILE)
+        encontrados = []
+        
+        for libro in libros:
+            if criterio.lower() in libro[0].lower() or criterio.lower() in libro[1].lower():
+                encontrados.append(libro)
+        
+        if encontrados:
+            print("\nRESULTADOS DE BÚSQUEDA ")
+            for libro in encontrados:
+                print(f"Codigo: {libro[0]}, Titulo: {libro[1]}, Autor: {libro[2]}, Categoria: {libro[3]}, Cantidad: {libro[4]}")
+        else:
+            print("No se encontraron libros que coincidan con el criterio de búsqueda.")
+    
+    elif opcion == '3':
+        cedula = input("Ingrese la cédula del alumno: ")
+        prestamos = leer_archivo(PRESTAMOS_FILE)
+        encontrados = []
+        
+        for prestamo in prestamos:
+            if prestamo[0] == cedula:
+                encontrados.append(prestamo)
+        
+        if encontrados:
+            alumno = buscar_registro(ALUMNOS_FILE, cedula, 0)
+            if alumno:
+                print(f"\nPRESTAMOS DE {alumno[1].upper()} (Cedula: {alumno[0]})")
+            
+            for prestamo in encontrados:
+                libro = buscar_registro(LIBROS_FILE, prestamo[1], 0)
+                libro_info = libro[1] if libro else "Libro no encontrado"
+                print(f"Libro: {libro_info}, Fecha prestamo: {prestamo[2]}, Fecha devolucion: {prestamo[3]}, Estado: {prestamo[4]}")
+        else:
+            print("No se encontraron prestamos para este alumno.")
+    
+    elif opcion == '0':
+        return
+    
+    else:
+        print("Opcin no válida.")
+
+# creacion de la funcion principal
+def main():
+# Crear archivos si no existen
+    for archivo in [ALUMNOS_FILE, LIBROS_FILE, PRESTAMOS_FILE, SANCIONES_FILE]:
+        if not os.path.exists(archivo):
+            open(archivo, 'w').close()    
+    
+    while True:
+        verificar_sanciones()
+        mostrar_menu_principal()
+        opcion = input("Seleccione una opcion: ")
+        
+        if opcion == '1':
+            registrar_alumno()
+        elif opcion == '2':
+            registrar_prestamo()
+        elif opcion == '3':
+            mostrar_prestamos_activos()
+        elif opcion == '4':
+            mostrar_libros()
+        elif opcion == '5':
+            mostrar_alumnos_sancionados()
+        elif opcion == '6':
+            renovar_prestamo()
+        elif opcion == '7':
+            devolver_libro()
+        elif opcion == '8':
+            ingresar_libro()
+        elif opcion == '9':
+            modificar_registros()
+        elif opcion == '10':
+            eliminar_registros()
+        elif opcion == '11':
+            buscar_registros()
+        elif opcion == '0':
+            print("\nSaliendo del sistema...")
+            break
+        else:
+            print("Opción no valida. Intente nuevamente.")
+        
+        input("\nPresione Enter para continuar...")
+main()
+#fin del codigo
